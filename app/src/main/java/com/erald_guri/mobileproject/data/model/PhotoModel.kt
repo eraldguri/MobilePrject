@@ -17,4 +17,7 @@ data class PhotoModel(
 
     @SerializedName("url")
     var url: String,
+
+    @SerializedName("download_url")
+    var downloadUrl: String
 )

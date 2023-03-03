@@ -7,12 +7,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.erald_guri.mobileproject.data.model.PhotoModel
 import com.erald_guri.mobileproject.databinding.LayoutListItemBinding
 import com.erald_guri.mobileproject.databinding.LayoutLoadingBinding
+import com.erald_guri.mobileproject.interfaces.OnClickListener
 import com.erald_guri.mobileproject.ui.PhotoViewHolder
 import com.erald_guri.mobileproject.ui.ProgressViewHolder
 
 class PhotoAdapter(
     private val context: Context,
-    private val photos: List<PhotoModel>
+    private val photos: List<PhotoModel>,
+    private val onClickListener: OnClickListener
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -20,7 +22,7 @@ class PhotoAdapter(
         when (viewType) {
             VIEW_TYPE_ITEM -> {
                 val binding = LayoutListItemBinding.inflate(inflater, parent, false)
-                return PhotoViewHolder(context, binding)
+                return PhotoViewHolder(context, binding, onClickListener)
             }
             VIEW_TYPE_LOADING -> {
                 val binding = LayoutLoadingBinding.inflate(inflater, parent, false)

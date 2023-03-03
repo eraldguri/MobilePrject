@@ -1,7 +1,8 @@
 package com.erald_guri.mobileproject.di
 
-import com.erald_guri.mobileproject.data.repository.ApiRepository
 import com.erald_guri.mobileproject.data.service.ApiService
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +17,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://picsum.photos/v2/"
+    private const val BASE_URL = "https://picsum.photos/"
+
+    val gson: Gson = GsonBuilder().setLenient().create()
 
     @Singleton
     @Provides
@@ -35,13 +38,13 @@ object NetworkModule {
     @Singleton
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .baseUrl(BASE_URL)
         .client(okHttpClient)
         .build()
 
     @Singleton
     @Provides
-    fun providesApiService(retrofit: Retrofit) = retrofit.create(ApiService::class.java)
+    fun providesApiService(retrofit: Retrofit): ApiService = retrofit.create(ApiService::class.java)
 
 }

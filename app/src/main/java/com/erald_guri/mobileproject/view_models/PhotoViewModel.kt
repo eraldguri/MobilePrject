@@ -21,4 +21,40 @@ class PhotoViewModel @Inject constructor(private val repository: ApiRepository):
         }
     }
 
+    fun getPhotoDetails(id: Int) = liveData(Dispatchers.IO) {
+        emit(NetworkResult.loading(data = null))
+        try {
+            emit(NetworkResult.success(data = repository.getPhotoDetails(id)))
+        } catch (e: Exception) {
+            emit(NetworkResult.error(data = null, message = e.message ?: "Error occurred"))
+        }
+    }
+
+    fun getPhotoNormal(id: Int) = liveData(Dispatchers.IO) {
+        emit(NetworkResult.loading(data = null))
+        try {
+            emit(NetworkResult.success(data = repository.getPhotoNormal(id)))
+        } catch (e: Exception) {
+            emit(NetworkResult.error(data = null, message = e.message ?: "Error occurred"))
+        }
+    }
+
+    fun getPhotoBlurred(id: Int, blur: Int) = liveData(Dispatchers.IO) {
+        emit(NetworkResult.loading(data = null))
+        try {
+            emit(NetworkResult.success(data = repository.getPhotoBlurred(id, blur)))
+        } catch (e: Exception) {
+            emit(NetworkResult.error(data = null, message = e.message ?: "Error occurred"))
+        }
+    }
+
+    fun getPhotoGrayScaled(id: Int, grayscale: Int) = liveData(Dispatchers.IO) {
+        emit(NetworkResult.loading(data = null))
+        try {
+            emit(NetworkResult.success(data = repository.getPhotoGrayScale(id, grayscale)))
+        } catch (e: Exception) {
+            emit(NetworkResult.error(data = null, message = e.message ?: "Error occurred"))
+        }
+    }
+
 }

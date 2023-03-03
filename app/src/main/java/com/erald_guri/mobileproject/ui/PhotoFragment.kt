@@ -11,6 +11,7 @@ import com.erald_guri.mobileproject.data.model.PhotoModel
 import com.erald_guri.mobileproject.databinding.FragmentPhotoBinding
 import com.erald_guri.mobileproject.interfaces.OnClickListener
 import com.erald_guri.mobileproject.utils.ApiStatus
+import com.erald_guri.mobileproject.utils.RecyclerViewScrollListener
 import com.erald_guri.mobileproject.view_models.PhotoViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,15 +22,55 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
 ) {
 
     private val viewModel by viewModels<PhotoViewModel>()
+    private lateinit var photoAdapter: PhotoAdapter
+
+    private var currentPage = PAGE_START_INDEX
+
+    private var isLoading = false
+    private var isLastPage = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.getPhotos().observe(viewLifecycleOwner) {
+        loadFirstPage()
+    }
+
+    private fun loadFirstPage() {
+        viewModel.getPhotos(currentPage, 20).observe(viewLifecycleOwner) {
             it?.let { result ->
                 when (result.status) {
                     ApiStatus.SUCCESS -> {
-                        setupRecyclerView(it.data?.body())
+                        val data = ArrayList<PhotoModel>()
+                        data.addAll(result.data?.body()!!)
+
+//                        if (currentPage <= TOTAL_PAGES) {
+//                            photoAdapter.showLoader()
+//                        } else {
+//                            isLastPage = true
+//                        }
+
+                        photoAdapter = PhotoAdapter(requireContext(), data, onItemClickListener)
+                        val linearLayoutManager = LinearLayoutManager(requireContext())
+                        binding.recycler.apply {
+                            layoutManager = linearLayoutManager
+                            adapter = photoAdapter
+                            addOnScrollListener(object: RecyclerViewScrollListener(linearLayoutManager) {
+                                override fun loadMore() {
+                                    isLoading = true
+                                    currentPage += 1
+                                    loadNextPage(currentPage)
+                                }
+
+                                override fun isLoading(): Boolean {
+                                    return isLoading
+                                }
+
+                                override fun isLastPage(): Boolean {
+                                    return isLastPage
+                                }
+
+                            })
+                        }
                     }
                     ApiStatus.ERROR -> {
                         Snackbar.make(binding.root, it.message!!, Snackbar.LENGTH_SHORT).show()
@@ -42,11 +83,32 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
         }
     }
 
-    private fun setupRecyclerView(photos: List<PhotoModel>?) {
-        val photoAdapter = PhotoAdapter(requireContext(), photos!!, onItemClickListener)
-        binding.recycler.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = photoAdapter
+    private fun loadNextPage(page: Int) {
+        viewModel.getPhotos(page, 20).observe(viewLifecycleOwner) {
+            it?.let { result ->
+                when (result.status) {
+                    ApiStatus.SUCCESS -> {
+                        photoAdapter.showLoader()
+                        isLoading = false
+
+                        val data = ArrayList<PhotoModel>()
+                        data.addAll(result.data?.body()!!)
+                        photoAdapter.addAll(data)
+
+                        if (currentPage != TOTAL_PAGES) {
+                            photoAdapter.showLoader()
+                        } else {
+                            isLastPage = true
+                        }
+                    }
+                    ApiStatus.ERROR -> {
+                        Snackbar.make(binding.root, it.message!!, Snackbar.LENGTH_SHORT).show()
+                    }
+                    ApiStatus.LOADING -> {
+
+                    }
+                }
+            }
         }
     }
 
@@ -56,6 +118,11 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
             findNavController().navigate(action)
         }
 
+    }
+
+    companion object {
+        const val PAGE_START_INDEX = 1
+        const val TOTAL_PAGES = 5
     }
 
 }

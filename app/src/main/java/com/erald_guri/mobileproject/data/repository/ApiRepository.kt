@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 class ApiRepository @Inject constructor(private val apiService: ApiService) {
 
-    suspend fun getPhotos() = apiService.getPhotos()
+    suspend fun getPhotos(page: Int, limit: Int) = apiService.getPhotos(page, limit)
 
     suspend fun getPhotoDetails(id: Int) = apiService.getPhotoDetails(id)
 

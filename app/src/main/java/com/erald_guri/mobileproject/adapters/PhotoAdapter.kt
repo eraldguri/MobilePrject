@@ -13,24 +13,11 @@ import com.erald_guri.mobileproject.ui.ProgressViewHolder
 
 class PhotoAdapter(
     private val context: Context,
-    private val photos: List<PhotoModel>,
+    private val photos: ArrayList<PhotoModel>,
     private val onClickListener: OnClickListener
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        when (viewType) {
-            VIEW_TYPE_ITEM -> {
-                val binding = LayoutListItemBinding.inflate(inflater, parent, false)
-                return PhotoViewHolder(context, binding, onClickListener)
-            }
-            VIEW_TYPE_LOADING -> {
-                val binding = LayoutLoadingBinding.inflate(inflater, parent, false)
-                return ProgressViewHolder(binding)
-            }
-        }
-        return null!!
-    }
+    private var isLoaderEnabled = false
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is PhotoViewHolder) {
@@ -39,12 +26,56 @@ class PhotoAdapter(
         }
     }
 
-    override fun getItemCount(): Int = photos.size
-
-    override fun getItemViewType(position: Int): Int = if (photos[position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return if (viewType == VIEW_TYPE_ITEM) {
+            val binding = LayoutListItemBinding.inflate(inflater, parent, false)
+            PhotoViewHolder(context, binding, onClickListener)
+        } else {
+            val binding = LayoutLoadingBinding.inflate(inflater, parent, false)
+            ProgressViewHolder(binding)
+        }
+    }
 
     companion object {
         const val VIEW_TYPE_ITEM = 0
         const val VIEW_TYPE_LOADING = 1
     }
+
+    override fun getItemCount(): Int {
+        return photos.size
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == photos.size - 1 && isLoaderEnabled) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    }
+
+    fun showLoader() {
+        isLoaderEnabled = true
+        //TODO: add new photo
+        add(PhotoModel())
+    }
+
+    fun hideLoader() {
+        isLoaderEnabled = false
+        val item = getPhoto(photos.size - 1)
+        if (item != null) {
+            photos.removeAt(photos.size - 1)
+            notifyItemRemoved(photos.size - 1)
+        }
+    }
+
+    fun add(photo: PhotoModel) {
+        photos.add(photo)
+        notifyItemInserted(photos.size - 1)
+    }
+
+    fun addAll(results: ArrayList<PhotoModel>) {
+        for (photo in results) {
+            add(photo)
+        }
+    }
+
+    fun getPhoto(position: Int): PhotoModel = photos[position]
+
 }

@@ -10,7 +10,7 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("v2/list")
-    suspend fun getPhotos(): Response<List<PhotoModel>>
+    suspend fun getPhotos(@Query("page") page: Int, @Query("limit") limit: Int): Response<List<PhotoModel>>
 
     @GET("id/{id}/info")
     suspend fun getPhotoDetails(@Path("id") id: Int): Response<PhotoModel>

@@ -20,4 +20,6 @@ data class PhotoModel(
 
     @SerializedName("download_url")
     var downloadUrl: String
-)
+) {
+    constructor(): this(0, "", 0, 0, "", "")
+}

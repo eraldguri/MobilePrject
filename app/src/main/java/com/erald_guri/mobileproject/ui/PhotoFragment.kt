@@ -43,13 +43,14 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
                         val data = ArrayList<PhotoModel>()
                         data.addAll(result.data?.body()!!)
 
-//                        if (currentPage <= TOTAL_PAGES) {
-//                            photoAdapter.showLoader()
-//                        } else {
-//                            isLastPage = true
-//                        }
-
                         photoAdapter = PhotoAdapter(requireContext(), data, onItemClickListener)
+
+                        if (currentPage <= TOTAL_PAGES) {
+                            photoAdapter.showLoader()
+                        } else {
+                            isLastPage = true
+                        }
+
                         val linearLayoutManager = LinearLayoutManager(requireContext())
                         binding.recycler.apply {
                             layoutManager = linearLayoutManager
@@ -88,7 +89,7 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
             it?.let { result ->
                 when (result.status) {
                     ApiStatus.SUCCESS -> {
-                        photoAdapter.showLoader()
+                        photoAdapter.hideLoader()
                         isLoading = false
 
                         val data = ArrayList<PhotoModel>()
@@ -122,7 +123,7 @@ class PhotoFragment : BaseFragment<FragmentPhotoBinding>(
 
     companion object {
         const val PAGE_START_INDEX = 1
-        const val TOTAL_PAGES = 5
+        const val TOTAL_PAGES = 20
     }
 
 }

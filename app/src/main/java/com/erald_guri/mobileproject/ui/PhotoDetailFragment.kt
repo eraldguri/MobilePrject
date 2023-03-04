@@ -29,6 +29,7 @@ class PhotoDetailFragment : BaseFragment<FragmentPhotoDetailBinding>(
 
         photoId = PhotoDetailFragmentArgs.fromBundle(requireArguments()).position
         normalImage()
+        getPhotoDetails()
 
         binding.btnNormal.setOnClickListener { normalImage() }
         binding.btnBlur.setOnClickListener { blurredImage() }
@@ -98,6 +99,25 @@ class PhotoDetailFragment : BaseFragment<FragmentPhotoDetailBinding>(
             .load(bitmap)
             .override(800, 1000)
             .into(binding.imageView)
+    }
+
+    private fun getPhotoDetails() {
+        viewModel.getPhotoDetails(photoId).observe(viewLifecycleOwner) {
+            it?.let { result ->
+                when (result.status) {
+                    ApiStatus.SUCCESS -> {
+                        val response = result.data?.body()
+                        binding.tvAuthor.text = response?.author
+                    }
+                    ApiStatus.ERROR -> {
+
+                    }
+                    ApiStatus.LOADING -> {
+
+                    }
+                }
+            }
+        }
     }
 
 }
